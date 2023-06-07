@@ -12,8 +12,13 @@ services:
     image: postgres
     container_name: db
     ports:
-      - '${DB_PORT}:5432'
+      - '${DB_HOST_PORT}:5432'
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+
+networks:
+  default:
+    driver: bridge
+    attachable: true
