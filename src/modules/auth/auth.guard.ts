@@ -7,12 +7,20 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { Request } from 'express';
+import { Reflector } from '@nestjs/core';
+import { SKIP_AUTH_KEY } from 'src/decorators/skip-auth/skip-auth.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService, private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const canSkipAuth = this.reflector.getAllAndOverride<boolean>(
+      SKIP_AUTH_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (canSkipAuth) return true;
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
@@ -27,6 +35,7 @@ export class AuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException();
     }
+
     return true;
   }
 
