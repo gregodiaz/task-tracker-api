@@ -6,8 +6,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
-	imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, UsersModule],
-	controllers: [AppController],
-	providers: [AppService],
+  imports: [AuthModule, UsersModule, ConfigModule.forRoot({ isGlobal: true })],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
