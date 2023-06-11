@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Role } from 'src/decorators/roles/emuns/role.enum';
 import { UserSchema } from 'src/db/schema/users';
 
@@ -11,6 +11,7 @@ export class CreateUserDto {
   @IsString()
   password: UserSchema['password'];
 
-  @IsEnum(Role)
+  @IsNotEmpty()
+  @IsEnum(Role, { each: true })
   roles: UserSchema['roles'];
 }
