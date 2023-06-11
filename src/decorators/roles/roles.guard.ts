@@ -7,34 +7,34 @@ import { SKIP_AUTH_KEY } from '../skip-auth/skip-auth.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-	constructor(
-		private reflector: Reflector,
-		private userService: UsersService,
-	) { }
+  constructor(
+    private reflector: Reflector,
+    private userService: UsersService,
+  ) {}
 
-	async canActivate(context: ExecutionContext): Promise<boolean> {
-		const canSkipAuth = this.reflector.getAllAndOverride<boolean>(
-			SKIP_AUTH_KEY,
-			[context.getHandler(), context.getClass()],
-		);
-		if (canSkipAuth) return true;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const canSkipAuth = this.reflector.getAllAndOverride<boolean>(
+      SKIP_AUTH_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (canSkipAuth) return true;
 
-		let requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
-			context.getHandler(),
-			context.getClass(),
-		]);
-		if (!requiredRoles) return true;
+    let requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredRoles) return true;
 
-		try {
-			const { user } = context.switchToHttp().getRequest();
-			const userFound = await this.userService.findOne(user?.username);
+    try {
+      const { user } = context.switchToHttp().getRequest();
+      const userFound = await this.userService.findOne(user?.username);
 
-			const isAdmin = userFound?.roles?.includes(Role.Admin);
-			if (isAdmin) return true;
+      const isAdmin = userFound?.roles?.includes(Role.Admin);
+      if (isAdmin) return true;
 
-			return requiredRoles.some((role) => userFound?.roles?.includes(role));
-		} catch {
-			return false;
-		}
-	}
+      return requiredRoles.some((role) => userFound?.roles?.includes(role));
+    } catch {
+      return false;
+    }
+  }
 }

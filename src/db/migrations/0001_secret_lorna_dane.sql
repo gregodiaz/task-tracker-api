@@ -1,0 +1,4 @@
+ALTER TABLE "users" ADD PRIMARY KEY ("id");
+ALTER TABLE "users" ALTER COLUMN "username" SET NOT NULL;
+ALTER TABLE "users" ALTER COLUMN "password" SET NOT NULL;
+ALTER TABLE "users" ALTER COLUMN "roles" SET DEFAULT 'user';

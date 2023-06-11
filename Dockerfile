@@ -8,6 +8,4 @@ RUN npm install
 
 COPY . .
 
-RUN npm run generate
-
 CMD ["npm", "run", "dev"]
