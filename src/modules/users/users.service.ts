@@ -1,19 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/db/service/database.service';
 import { users } from 'src/db/schema/users';
 import { eq } from 'drizzle-orm';
+import { Role } from 'src/decorators/roles/emuns/role.enum';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private db: DatabaseService) {}
+  public saltOrRounds = 10;
 
   async create(createUserDto: CreateUserDto) {
-    return await this.db.connection
-      .insert(users)
-      .values(createUserDto)
-      .returning();
+    const { username, password, roles = Role.User } = createUserDto;
+
+    // Check if username is taken
+    const storedUsers = await this.findAll();
+    const isTaken = storedUsers.some((user) => user.username === username);
+    if (isTaken) {
+      throw new ConflictException('Username is already taken');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, this.saltOrRounds);
+
+    const newUser = { username, password: hashedPassword, roles };
+
+    // Create user
+    return await this.db.connection.insert(users).values(newUser).returning();
   }
 
   async findAll() {
@@ -37,6 +52,12 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
+    const { password } = updateUserDto;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, this.saltOrRounds);
+      updateUserDto.password = hashedPassword;
+    }
+
     return await this.db.connection
       .update(users)
       .set(updateUserDto)
