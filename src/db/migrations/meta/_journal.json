@@ -15,6 +15,13 @@
       "when": 1686423140517,
       "tag": "0001_secret_lorna_dane",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1686460724356,
+      "tag": "0002_aromatic_invisible_woman",
+      "breakpoints": false
     }
   ]
 }
