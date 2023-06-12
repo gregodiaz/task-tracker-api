@@ -31,14 +31,24 @@ export class UsersController {
 		return this.usersService.findAll();
 	}
 
-	@Get('id/:id')
-	findOneById(@Param('id') id: number) {
-		return this.usersService.findOneById(+id);
+	@Get('tasks')
+	findAllWithTasks() {
+		return this.usersService.findAllWithTasks();
 	}
 
-	@Get(':username')
-	findOne(@Param('username') username: string) {
-		return this.usersService.findOne(username);
+	@Get('username/:username')
+	findOneByUsername(@Param('username') username: string) {
+		return this.usersService.findOneByUsername(username);
+	}
+
+	@Get(':id')
+	findOne(@Param('id') id: number) {
+		return this.usersService.findOne(+id);
+	}
+
+	@Get(':id/tasks')
+	findOneWithTasks(@Param('id') id: number) {
+		return this.usersService.findOneWithTasks(+id);
 	}
 
 	@Roles(Role.Admin)

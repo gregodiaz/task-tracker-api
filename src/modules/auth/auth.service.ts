@@ -15,7 +15,7 @@ export class AuthService {
   ) {}
 
   async signIn(username: string, pass: string): Promise<any> {
-    const user = await this.userService.findOne(username);
+    const user = await this.userService.findOneByUsername(username);
     const match = await bcrypt.compare(pass, user?.password);
     if (!match) {
       throw new UnauthorizedException();

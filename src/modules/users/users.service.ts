@@ -36,7 +36,16 @@ export class UsersService {
     return allUsers;
   }
 
-  async findOne(username: string) {
+  async findAllWithTasks() {
+    const storedUsers = await this.db.connection.query.users.findMany({
+			columns: { password: false },
+			with: { tasks: true },
+		})
+
+    return storedUsers;
+  }
+
+  async findOneByUsername(username: string) {
     const storedUser = await this.db.connection
       .select()
       .from(users)
@@ -46,7 +55,7 @@ export class UsersService {
     return foundUser;
   }
 
-  async findOneById(id: number) {
+  async findOne(id: number) {
     const storedUser = await this.db.connection
       .select()
       .from(users)
@@ -54,6 +63,16 @@ export class UsersService {
     const foundUser = new UserEntity(storedUser[0]);
 
     return foundUser;
+  }
+
+  async findOneWithTasks(id: number) {
+    const storedUser = await this.db.connection.query.users.findFirst({
+      where: eq(users.id, id),
+      columns: { password: false },
+      with: { tasks: true },
+    });
+
+    return storedUser;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
