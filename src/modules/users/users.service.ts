@@ -5,7 +5,7 @@ import { DatabaseService } from 'src/db/service/database.service';
 import { users } from 'src/db/schema/users';
 import { eq } from 'drizzle-orm';
 import { Role } from 'src/decorators/roles/emuns/role.enum';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -15,20 +15,16 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const { username, password, roles = Role.User } = createUserDto;
 
-    // Check if username is taken
-    const storedUsers = await this.findAll();
-    const isTaken = storedUsers.some((user) => user.username === username);
-    if (isTaken) {
-      throw new ConflictException('Username is already taken');
-    }
+    await this.checkIfNameIsTaken(username);
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, this.saltOrRounds);
+    const userCreated = await this.db.connection
+      .insert(users)
+      .values({ username, password: hashedPassword, roles })
+      .returning();
 
-    const newUser = { username, password: hashedPassword, roles };
-
-    // Create user
-    return await this.db.connection.insert(users).values(newUser).returning();
+    return userCreated[0];
   }
 
   async findAll() {
@@ -36,11 +32,12 @@ export class UsersService {
   }
 
   async findOne(username: string) {
-    const result = await this.db.connection
+    const userFound = await this.db.connection
       .select()
       .from(users)
       .where(eq(users.username, username));
-    return result[0];
+
+    return userFound[0];
   }
 
   async findOneById(id: number) {
@@ -48,27 +45,42 @@ export class UsersService {
       .select()
       .from(users)
       .where(eq(users.id, id));
+
     return result[0];
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
+    await this.checkIfNameIsTaken(updateUserDto.username);
+
     const { password } = updateUserDto;
     if (password) {
       const hashedPassword = await bcrypt.hash(password, this.saltOrRounds);
       updateUserDto.password = hashedPassword;
     }
 
-    return await this.db.connection
+    const userUpdated = await this.db.connection
       .update(users)
       .set(updateUserDto)
       .where(eq(users.id, id))
       .returning();
+
+    return userUpdated[0];
   }
 
   async remove(id: number) {
-    return await this.db.connection
+    const userDeleted = await this.db.connection
       .delete(users)
       .where(eq(users.id, id))
       .returning();
+
+    return userDeleted[0];
+  }
+
+  async checkIfNameIsTaken(name: string) {
+    const storedUsers = await this.findAll();
+    const isTaken = storedUsers.some((user) => user.username === name);
+    if (isTaken) {
+      throw new ConflictException('Username is already taken');
+    }
   }
 }
