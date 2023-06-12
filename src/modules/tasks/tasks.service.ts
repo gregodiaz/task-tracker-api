@@ -7,26 +7,28 @@ import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class TasksService {
-	constructor(private db: DatabaseService) {}
+	constructor(private db: DatabaseService) { }
 
-  async create(createTaskDto: CreateTaskDto) {
+	async create(createTaskDto: CreateTaskDto) {
 		const createdTask = await this.db.connection
 			.insert(tasks)
 			.values(createTaskDto)
 			.returning();
 
 		return createdTask[0];
-  }
+	}
 
 	async findAll() {
-		return await this.db.connection.select().from(tasks);
+		return await this.db.connection.query.tasks.findMany({
+			with: { client: true, user: { columns: { password: false } } },
+		});
 	}
 
 	async findOne(id: number) {
-		const foundTask = await this.db.connection
-			.select()
-			.from(tasks)
-			.where(eq(tasks.id, id));
+		const foundTask = await this.db.connection.query.tasks.findFirst({
+			where: eq(tasks.id, id),
+			with: { client: true, user: { columns: { password: false } } },
+		});
 
 		return foundTask[0];
 	}
