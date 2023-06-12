@@ -1,8 +1,15 @@
+import { Exclude } from 'class-transformer';
 import { Role } from 'src/decorators/roles/emuns/role.enum';
 
-export class User {
+export class UserEntity {
   id: number;
   username: string;
+  roles: Role;
+
+  @Exclude()
   password: string;
-  roles: Role[];
+
+  constructor(partial: Partial<UserEntity>) {
+    Object.assign(this, partial);
+  }
 }

@@ -12,10 +12,12 @@ export class ClientsService {
 	async create(createClientDto: CreateClientDto) {
 		await this.checkIfNameIsTaken(createClientDto.name);
 
-		return await this.db.connection
+		const createdClient = await this.db.connection
 			.insert(clients)
 			.values(createClientDto)
 			.returning();
+
+		return createdClient[0];
 	}
 
 	async findAll() {
@@ -23,28 +25,33 @@ export class ClientsService {
 	}
 
 	async findOne(id: number) {
-		const result = await this.db.connection
+		const foundClient = await this.db.connection
 			.select()
 			.from(clients)
 			.where(eq(clients.id, id));
-		return result[0];
+
+		return foundClient[0];
 	}
 
 	async update(id: number, updateClientDto: UpdateClientDto) {
 		await this.checkIfNameIsTaken(updateClientDto.name);
 
-		return await this.db.connection
+		const updatedClient = await this.db.connection
 			.update(clients)
 			.set(updateClientDto)
 			.where(eq(clients.id, id))
 			.returning();
+
+		return updatedClient[0];
 	}
 
 	async remove(id: number) {
-		return await this.db.connection
+		const deletedClient = await this.db.connection
 			.delete(clients)
 			.where(eq(clients.id, id))
 			.returning();
+
+		return deletedClient[0];
 	}
 
 	async checkIfNameIsTaken(name: string) {

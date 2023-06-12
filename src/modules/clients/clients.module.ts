@@ -5,7 +5,6 @@ import { DatabaseService } from 'src/db/service/database.service';
 
 @Module({
   controllers: [ClientsController],
-  providers: [ClientsService, DatabaseService
-	]
+  providers: [ClientsService, DatabaseService],
 })
 export class ClientsModule {}
