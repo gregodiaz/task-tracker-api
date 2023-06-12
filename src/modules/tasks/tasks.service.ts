@@ -1,26 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { DatabaseService } from 'src/db/service/database.service';
+import { tasks } from 'src/db/schema/tasks';
+import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class TasksService {
-  create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+	constructor(private db: DatabaseService) {}
+
+  async create(createTaskDto: CreateTaskDto) {
+		const createdTask = await this.db.connection
+			.insert(tasks)
+			.values(createTaskDto)
+			.returning();
+
+		return createdTask[0];
   }
 
-  findAll() {
-    return `This action returns all tasks`;
-  }
+	async findAll() {
+		return await this.db.connection.select().from(tasks);
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
-  }
+	async findOne(id: number) {
+		const foundTask = await this.db.connection
+			.select()
+			.from(tasks)
+			.where(eq(tasks.id, id));
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
-  }
+		return foundTask[0];
+	}
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
-  }
+	async update(id: number, updateTaskDto: UpdateTaskDto) {
+		const updatedTask = await this.db.connection
+			.update(tasks)
+			.set(updateTaskDto)
+			.where(eq(tasks.id, id))
+			.returning();
+
+		return updatedTask[0];
+	}
+
+	async remove(id: number) {
+		const deletedTask = await this.db.connection
+			.delete(tasks)
+			.where(eq(tasks.id, id))
+			.returning();
+
+		return deletedTask[0];
+	}
 }

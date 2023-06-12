@@ -1,10 +1,11 @@
-import { IsBoolean, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateTaskDto {
 	@IsNotEmpty()
 	@IsString()
 	description: string;
 
+	@IsOptional()
 	@IsBoolean()
 	done: boolean;
 
