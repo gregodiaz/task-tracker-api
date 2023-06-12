@@ -28,10 +28,20 @@ export class ClientsController {
     return this.clientsService.findAll();
   }
 
+	@Get('tasks')
+	findAllWithTasks() {
+		return this.clientsService.findAllWithTasks();
+	}
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.clientsService.findOne(+id);
   }
+
+	@Get(':id/tasks')
+	findOneWithTasks(@Param('id') id: number) {
+		return this.clientsService.findOneWithTasks(+id);
+	}
 
   @Roles(Role.Admin)
   @Patch(':id')

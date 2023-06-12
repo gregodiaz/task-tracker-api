@@ -30,7 +30,7 @@ export class TasksService {
 			with: { client: true, user: { columns: { password: false } } },
 		});
 
-		return foundTask[0];
+		return foundTask;
 	}
 
 	async update(id: number, updateTaskDto: UpdateTaskDto) {
