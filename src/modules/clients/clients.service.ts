@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { DatabaseService } from 'src/db/service/database.service';
+import { clients } from 'src/db/schema/clients';
+import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class ClientsService {
-  create(createClientDto: CreateClientDto) {
-    return 'This action adds a new client';
-  }
+	constructor(private db: DatabaseService) { }
 
-  findAll() {
-    return `This action returns all clients`;
-  }
+	async create(createClientDto: CreateClientDto) {
+		await this.checkIfNameIsTaken(createClientDto.name);
 
-  findOne(id: number) {
-    return `This action returns a #${id} client`;
-  }
+		return await this.db.connection
+			.insert(clients)
+			.values(createClientDto)
+			.returning();
+	}
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return `This action updates a #${id} client`;
-  }
+	async findAll() {
+		return await this.db.connection.select().from(clients);
+	}
 
-  remove(id: number) {
-    return `This action removes a #${id} client`;
-  }
+	async findOne(id: number) {
+		const result = await this.db.connection
+			.select()
+			.from(clients)
+			.where(eq(clients.id, id));
+		return result[0];
+	}
+
+	async update(id: number, updateClientDto: UpdateClientDto) {
+		await this.checkIfNameIsTaken(updateClientDto.name);
+
+		return await this.db.connection
+			.update(clients)
+			.set(updateClientDto)
+			.where(eq(clients.id, id))
+			.returning();
+	}
+
+	async remove(id: number) {
+		return await this.db.connection
+			.delete(clients)
+			.where(eq(clients.id, id))
+			.returning();
+	}
+
+	async checkIfNameIsTaken(name: string) {
+		const storedClients = await this.findAll();
+		const isTaken = storedClients.some((client) => client.name === name);
+		if (isTaken) {
+			throw new ConflictException('Clientname is already taken');
+		}
+	}
 }
