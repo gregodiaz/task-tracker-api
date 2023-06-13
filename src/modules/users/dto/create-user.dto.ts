@@ -13,5 +13,5 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsEnum(Role)
-  roles: UserSchema['roles'];
+  roles?: UserSchema['roles'];
 }

@@ -10,7 +10,7 @@ export class UserEntity {
   @Exclude()
   password: string;
 
-	tasks: TaskEntity[];
+	tasks?: TaskEntity[];
 
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
