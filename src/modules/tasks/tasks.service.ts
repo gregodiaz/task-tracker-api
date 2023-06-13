@@ -4,13 +4,14 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { DatabaseService } from 'src/db/service/database.service';
 import { tasks } from 'src/db/schema/tasks';
 import { eq } from 'drizzle-orm';
+import { TaskEntity } from './entities/task.entity';
 
 @Injectable()
 export class TasksService {
 	constructor(private db: DatabaseService) { }
 
 	async create(createTaskDto: CreateTaskDto) {
-		const createdTask = await this.db.connection
+		const createdTask: TaskEntity[] = await this.db.connection
 			.insert(tasks)
 			.values(createTaskDto)
 			.returning();
@@ -19,13 +20,16 @@ export class TasksService {
 	}
 
 	async findAll() {
-		return await this.db.connection.query.tasks.findMany({
-			with: { client: true, user: { columns: { password: false } } },
-		});
+		const storedTasks: TaskEntity[] =
+			await this.db.connection.query.tasks.findMany({
+				with: { client: true, user: { columns: { password: false } } },
+			});
+
+		return storedTasks;
 	}
 
 	async findOne(id: number) {
-		const foundTask = await this.db.connection.query.tasks.findFirst({
+		const foundTask: TaskEntity = await this.db.connection.query.tasks.findFirst({
 			where: eq(tasks.id, id),
 			with: { client: true, user: { columns: { password: false } } },
 		});
@@ -34,7 +38,7 @@ export class TasksService {
 	}
 
 	async update(id: number, updateTaskDto: UpdateTaskDto) {
-		const updatedTask = await this.db.connection
+		const updatedTask: TaskEntity[] = await this.db.connection
 			.update(tasks)
 			.set(updateTaskDto)
 			.where(eq(tasks.id, id))
@@ -44,7 +48,7 @@ export class TasksService {
 	}
 
 	async remove(id: number) {
-		const deletedTask = await this.db.connection
+		const deletedTask: TaskEntity[] = await this.db.connection
 			.delete(tasks)
 			.where(eq(tasks.id, id))
 			.returning();

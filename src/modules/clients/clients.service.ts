@@ -2,8 +2,9 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { DatabaseService } from 'src/db/service/database.service';
-import { clients } from 'src/db/schema/clients';
+import { ClientSchema, clients } from 'src/db/schema/clients';
 import { eq } from 'drizzle-orm';
+import { ClientEntity } from './entities/client.entity';
 
 @Injectable()
 export class ClientsService {
@@ -12,28 +13,33 @@ export class ClientsService {
   async create(createClientDto: CreateClientDto) {
     await this.checkIfNameIsTaken(createClientDto.name);
 
-    const createdClient = await this.db.connection
+    const createdClient: ClientSchema[] = await this.db.connection
       .insert(clients)
       .values(createClientDto)
       .returning();
+    const newClient: Omit<ClientEntity, 'tasks'> = createdClient[0];
 
-    return createdClient[0];
+    return newClient;
   }
 
   async findAll() {
-    return await this.db.connection.select().from(clients);
+    const storedClients: Omit<ClientEntity, 'tasks'>[] =
+      await this.db.connection.select().from(clients);
+
+    return storedClients;
   }
 
   async findAllWithTasks() {
-    const storedClients = await this.db.connection.query.users.findMany({
-      with: { tasks: true },
-    });
+    const storedClients: ClientEntity[] =
+      await this.db.connection.query.clients.findMany({
+        with: { tasks: true },
+      });
 
     return storedClients;
   }
 
   async findOne(id: number) {
-    const foundClient = await this.db.connection
+    const foundClient: Omit<ClientEntity, 'tasks'>[] = await this.db.connection
       .select()
       .from(clients)
       .where(eq(clients.id, id));
@@ -42,10 +48,11 @@ export class ClientsService {
   }
 
   async findOneWithTasks(id: number) {
-    const storedClient = await this.db.connection.query.clients.findFirst({
-      where: eq(clients.id, id),
-      with: { tasks: true },
-    });
+    const storedClient: ClientEntity =
+      await this.db.connection.query.clients.findFirst({
+        where: eq(clients.id, id),
+        with: { tasks: true },
+      });
 
     return storedClient;
   }
@@ -53,20 +60,22 @@ export class ClientsService {
   async update(id: number, updateClientDto: UpdateClientDto) {
     await this.checkIfNameIsTaken(updateClientDto.name);
 
-    const updatedClient = await this.db.connection
-      .update(clients)
-      .set(updateClientDto)
-      .where(eq(clients.id, id))
-      .returning();
+    const updatedClient: Omit<ClientEntity, 'tasks'>[] =
+      await this.db.connection
+        .update(clients)
+        .set(updateClientDto)
+        .where(eq(clients.id, id))
+        .returning();
 
     return updatedClient[0];
   }
 
   async remove(id: number) {
-    const deletedClient = await this.db.connection
-      .delete(clients)
-      .where(eq(clients.id, id))
-      .returning();
+    const deletedClient: Omit<ClientEntity, 'tasks'>[] =
+      await this.db.connection
+        .delete(clients)
+        .where(eq(clients.id, id))
+        .returning();
 
     return deletedClient[0];
   }
