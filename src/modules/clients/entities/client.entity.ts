@@ -5,5 +5,5 @@ export class ClientEntity {
   id: ClientSchema['id'];
   name: ClientSchema['name'];
 
-	tasks: TaskEntity[];
+	tasks?: TaskEntity[];
 }
