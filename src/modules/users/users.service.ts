@@ -33,7 +33,7 @@ export class UsersService {
     const storedUsers: UserSchema[] = await this.db.connection
       .select()
       .from(users);
-    const allUsers: Omit<UserEntity, 'tasks'>[] = storedUsers.map(
+    const allUsers: UserEntity[] = storedUsers.map(
       (user) => new UserEntity(user),
     );
 
@@ -66,7 +66,7 @@ export class UsersService {
       .select()
       .from(users)
       .where(eq(users.id, id));
-    const foundUser: Omit<UserEntity, 'tasks'> = new UserEntity(storedUser[0]);
+    const foundUser: UserEntity = new UserEntity(storedUser[0]);
 
     return foundUser;
   }

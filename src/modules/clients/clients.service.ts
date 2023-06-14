@@ -17,13 +17,13 @@ export class ClientsService {
       .insert(clients)
       .values(createClientDto)
       .returning();
-    const newClient: Omit<ClientEntity, 'tasks'> = createdClient[0];
+    const newClient: ClientEntity = createdClient[0];
 
     return newClient;
   }
 
   async findAll() {
-    const storedClients: Omit<ClientEntity, 'tasks'>[] =
+    const storedClients: ClientEntity[] =
       await this.db.connection.select().from(clients);
 
     return storedClients;
@@ -39,7 +39,7 @@ export class ClientsService {
   }
 
   async findOne(id: number) {
-    const foundClient: Omit<ClientEntity, 'tasks'>[] = await this.db.connection
+    const foundClient: ClientEntity[] = await this.db.connection
       .select()
       .from(clients)
       .where(eq(clients.id, id));
@@ -60,7 +60,7 @@ export class ClientsService {
   async update(id: number, updateClientDto: UpdateClientDto) {
     await this.checkIfNameIsTaken(updateClientDto.name);
 
-    const updatedClient: Omit<ClientEntity, 'tasks'>[] =
+    const updatedClient: ClientEntity[] =
       await this.db.connection
         .update(clients)
         .set(updateClientDto)
@@ -71,7 +71,7 @@ export class ClientsService {
   }
 
   async remove(id: number) {
-    const deletedClient: Omit<ClientEntity, 'tasks'>[] =
+    const deletedClient: ClientEntity[] =
       await this.db.connection
         .delete(clients)
         .where(eq(clients.id, id))
