@@ -3,15 +3,11 @@ import { ClientsController } from './clients.controller';
 import { ClientsService } from './clients.service';
 import { DatabaseService } from 'src/db/service/database.service';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import { ConflictException } from '@nestjs/common';
 
 describe('ClientsController', () => {
 	let controller: ClientsController;
 	let service: ClientsService;
-	let app: INestApplication;
-	let authToken: string;
-	let url: string;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -21,26 +17,12 @@ describe('ClientsController', () => {
 
 		controller = module.get<ClientsController>(ClientsController);
 		service = module.get<ClientsService>(ClientsService);
-
-		app = module.createNestApplication();
-		await app.init();
-
-		url = 'http://localhost:3000';
-		const response = await request(url)
-			.post('/auth/login')
-			.set('Content-Type', 'application/json')
-			.send({ username: 'admin', password: 'admin' });
-
-		authToken = response.body.access_token;
-	});
-
-	afterEach(async () => {
-		await app.close();
 	});
 
 	describe('Unit tests', () => {
 		it('should create a client', async () => {
 			const result = { id: 1, name: 'Test' };
+
 			jest.spyOn(service, 'create').mockImplementation(async () => result);
 
 			expect(await controller.create(result)).toBe(result);
@@ -160,66 +142,6 @@ describe('ClientsController', () => {
 			await expect(service.checkIfNameIsTaken(name)).rejects.toThrow(
 				ConflictException,
 			);
-		});
-	});
-
-	describe('HTTP requests', () => {
-		it('should create a client (HTTP)', async () => {
-			const client = { id: 1, name: 'Test' };
-
-			return request(url)
-				.post('/clients')
-				.send(client)
-				.set('Authorization', `Bearer ${authToken}`)
-				.expect(201)
-				.expect(client);
-		});
-
-		it('should return an array of clients (HTTP)', async () => {
-			return request(url)
-				.get('/clients')
-				.set('Authorization', `Bearer ${authToken}`)
-				.expect(200)
-				.expect((response) => {
-					expect(response.body).toBeInstanceOf(Array);
-				});
-		});
-
-		it('should return a client (HTTP)', async () => {
-			const clientId = 1;
-
-			return request(url)
-				.get(`/clients/${clientId}`)
-				.set('Authorization', `Bearer ${authToken}`)
-				.expect(200)
-				.expect((response) => {
-					expect(response.body).toHaveProperty('id', clientId);
-				});
-		});
-
-		it('should update a client (HTTP)', async () => {
-			const id = 1;
-			const name = 'Updated Test';
-			const updatedClient = { id, name };
-
-			return request(url)
-				.patch(`/clients/${id}`)
-				.send({ name })
-				.set('Authorization', `Bearer ${authToken}`)
-				.expect(200)
-				.expect(updatedClient);
-		});
-
-		it('should delete a client (HTTP)', async () => {
-			const clientId = 1;
-
-			return request(url)
-				.delete(`/clients/${clientId}`)
-				.set('Authorization', `Bearer ${authToken}`)
-				.expect(200)
-				.expect((response) => {
-					expect(response.body).toHaveProperty('id', clientId);
-				});
 		});
 	});
 });

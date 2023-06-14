@@ -4,11 +4,9 @@ import { UsersService } from './users.service';
 import { DatabaseService } from 'src/db/service/database.service';
 import { ConfigService } from '@nestjs/config';
 import {
-  INestApplication,
   ConflictException,
   ValidationPipe,
 } from '@nestjs/common';
-import * as request from 'supertest';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from 'src/decorators/roles/emuns/role.enum';
 import { UserEntity } from './entities/user.entity';
@@ -17,9 +15,6 @@ import { APP_PIPE } from '@nestjs/core';
 describe('UsersController', () => {
   let controller: UsersController;
   let service: UsersService;
-  let app: INestApplication;
-  let authToken: string;
-  let url: string;
   const expectedUser: UserEntity = {
     id: 2,
     username: 'Test',
@@ -49,21 +44,6 @@ describe('UsersController', () => {
 
     controller = module.get<UsersController>(UsersController);
     service = module.get<UsersService>(UsersService);
-
-    app = module.createNestApplication();
-    await app.init();
-
-    url = 'http://localhost:3000';
-    const response = await request(url)
-      .post('/auth/login')
-      .set('Content-Type', 'application/json')
-      .send({ username: 'admin', password: 'admin' });
-
-    authToken = response.body.access_token;
-  });
-
-  afterEach(async () => {
-    await app.close();
   });
 
   describe('Unit tests', () => {
