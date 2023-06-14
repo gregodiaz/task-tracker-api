@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(username: string, pass: string): Promise<any> {
+  async signIn(username: string, pass: string) {
     const user = await this.userService.findOneByUsername(username);
     const match = await bcrypt.compare(pass, user?.password);
     if (!match) {

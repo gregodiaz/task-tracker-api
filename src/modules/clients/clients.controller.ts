@@ -28,30 +28,30 @@ export class ClientsController {
     return this.clientsService.findAll();
   }
 
-	@Get('tasks')
-	findAllWithTasks() {
-		return this.clientsService.findAllWithTasks();
-	}
+  @Get('tasks')
+  findAllWithTasks() {
+    return this.clientsService.findAllWithTasks();
+  }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.clientsService.findOne(+id);
   }
 
-	@Get(':id/tasks')
-	findOneWithTasks(@Param('id') id: number) {
-		return this.clientsService.findOneWithTasks(+id);
-	}
+  @Get(':id/tasks')
+  findOneWithTasks(@Param('id') id: number) {
+    return this.clientsService.findOneWithTasks(+id);
+  }
 
   @Roles(Role.Admin)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
+  update(@Param('id') id: number, @Body() updateClientDto: UpdateClientDto) {
     return this.clientsService.update(+id, updateClientDto);
   }
 
   @Roles(Role.Admin)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: number) {
     return this.clientsService.remove(+id);
   }
 }
