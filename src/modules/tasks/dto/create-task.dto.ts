@@ -7,7 +7,7 @@ export class CreateTaskDto {
 
 	@IsOptional()
 	@IsBoolean()
-	done: boolean;
+	done?: boolean;
 
 	@IsNotEmpty()
 	@IsInt()
